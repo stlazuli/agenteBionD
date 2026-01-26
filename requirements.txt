@@ -5,5 +5,4 @@ uvicorn
 fastapi
 pydantic
 sqlalchemy
-jwt
 PyJWT
