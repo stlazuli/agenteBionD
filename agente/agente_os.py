@@ -9,6 +9,7 @@ from agno.tools.memory import MemoryTools
 from dotenv import load_dotenv
 from pathlib import Path
 from pydantic import BaseModel
+from fastapi import FastAPI, HTTPException
 
 load_dotenv()
 
@@ -170,24 +171,48 @@ app = agent_os.get_app()
 
 class MensagemChat(BaseModel):
     message: str
+    session_id: str
     stream: bool = False
 
 @app.post("/api/chat")
 async def chat_customizado(dados: MensagemChat):
     try:
         
-        response = agent.run(dados.message, stream=False)
-        
+        response = agent.run(dados.message, session_id=dados.session_id, stream=False)        
         resposta_texto = response.content if hasattr(response, 'content') else str(response)
         
         return {
-            "content": resposta_texto,
-            "status": "success"
+            "agent_response": {
+                "content": resposta_texto,
+                "status": "success"
+            },
+            "api_infrastructure": {
+                "api_key_status": "active",
+                "daily_limit_reached": False,
+                "model_used": "claude-sonnet-4-5-20250929"
+            },
+            "memory_context": {
+                "active_session_id": dados.session_id,
+                "memory_type": "SqliteDb",
+                "history_loaded": True
+            }
         }
     except Exception as e:
+        is_limit_error = "429" in str(e) or "limit_reached" in str(e).lower()
         return {
-            "content": f"Erro interno no servidor: {str(e)}",
-            "status": "error"
+            "agent_response": {
+                "content": f"Erro interno: {str(e)}",
+                "status": "error"
+            },
+            "api_infrastructure": {
+                "api_key_status": "error" if is_limit_error else "active",
+                "daily_limit_reached": is_limit_error,
+                "error_detail": str(e)
+            },
+            "memory_context": {
+                "active_session_id": dados.session_id,
+                "history_loaded": False
+            }
         }
 
 if __name__ == "__main__":
