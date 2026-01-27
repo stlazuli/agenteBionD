@@ -152,7 +152,7 @@ skills = Skills(loaders=[LocalSkills(str(SKILLS_PATH))])
 
 agent = Agent(
     name="BionD Agent",
-    model=Claude(id="claude-3-5-sonnet-latest", temperature=0),
+    model=Claude(id="claude-sonnet-4-5-20250929", temperature=0),
     description="Assistente de qualificação de leads da BionD",
     instructions=INSTRUCTIONS,
     tools=[
