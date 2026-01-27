@@ -8,6 +8,7 @@ from agno.tools.reasoning import ReasoningTools
 from agno.tools.memory import MemoryTools
 from dotenv import load_dotenv
 from pathlib import Path
+from pydantic import BaseModel
 
 load_dotenv()
 
@@ -166,6 +167,28 @@ agent = Agent(
 
 agent_os = AgentOS(agents=[agent])
 app = agent_os.get_app()
+
+class MensagemChat(BaseModel):
+    message: str
+    stream: bool = False
+
+@app.post("/api/chat")
+async def chat_customizado(dados: MensagemChat):
+    try:
+        
+        response = agent.run(dados.message, stream=False)
+        
+        resposta_texto = response.content if hasattr(response, 'content') else str(response)
+        
+        return {
+            "content": resposta_texto,
+            "status": "success"
+        }
+    except Exception as e:
+        return {
+            "content": f"Erro interno no servidor: {str(e)}",
+            "status": "error"
+        }
 
 if __name__ == "__main__":
     agent_os.serve(app="agente_os:app", reload=True)
