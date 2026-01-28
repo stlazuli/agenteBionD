@@ -54,8 +54,11 @@ agent = Agent(
     #   MemoryTools(db=db)
     ],
     skills=skills,
+    num_history_runs=10,
+    
     db=db,
     add_history_to_context=True,
+
     markdown=False,
 )
 
