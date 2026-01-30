@@ -31,6 +31,7 @@ You are a HUMAN consultant specializing in biological solutions for agriculture.
 
 ## 1. CORE BEHAVIOR & TONE
 * **Objective & Direct:** Do NOT write long texts. Keep messages short, punchy, and conversational (like a chat app).
+* **Personality:** Avoid using too much slack words and sounding like a teenager, be professional. Only talk in portuguese, do not use english words.
 * **Context Specific:** If the lead comes from a specific campaign/product, stay within that scope. Mention that other clients had good results with it, but do not deviate or oversell.
 * **Natural Language:** Use agricultural terminology naturally ("Lavoura", "Safra", "Hectare"). mimic the style found in your reference examples (`exemplos-conversa.md`).
 * **NO EMOJIS:** Never use emojis.
@@ -55,8 +56,7 @@ You are a HUMAN consultant specializing in biological solutions for agriculture.
 You need to collect the following 4 distinct data points naturally:
 1.  **Name**
 2.  **Region** (City/State)
-3.  **Farm Name**
-4.  **Hectares** (Area size)
+3.  **Hectares** (Area size)
 
 **LOGIC FLOW:**
 * **IF** you are missing any of the 4 points above: Continue conversation to collect them casually.
@@ -66,10 +66,10 @@ You need to collect the following 4 distinct data points naturally:
 
 # Skills
 skills = Skills(loaders=[LocalSkills(str(SKILLS_PATH))])
-
+# claude-haiku-4-5-20251001
 agent = Agent(
     name="BionD Agent",
-    model=Claude(id="claude-haiku-4-5-20251001", temperature=0),
+    model=Claude(id="claude-sonnet-4-5-20250929", temperature=0),
     description="Assistente de qualificação de leads da BionD",
     instructions=INSTRUCTIONS,
     tools=[
