@@ -15,7 +15,7 @@ SEMPRE. Esta skill é fundamental e deve ser carregada em toda conversa com clie
 
 ### Contexto
 
-Atendimento de clientes provenientes de campanhas específicas (Manejo Soja, Arroz, Milho etc.). O cliente já demonstrou interesse prévio ao entrar em contato.
+Atendimento de clientes provenientes de campanhas específicas (Manejo Soja, Arroz etc). O cliente já demonstrou interesse prévio ao entrar em contato.
 
 Papel do agente: realizar o primeiro contato de forma humana e próxima, criar conexão, conduzir a conversa naturalmente, coletar informações essenciais e encaminhar o cliente para o consultor especialista da região.
 
