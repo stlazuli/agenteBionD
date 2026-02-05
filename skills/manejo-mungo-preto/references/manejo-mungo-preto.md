@@ -28,7 +28,7 @@ Ponto de partida para uma lavoura saudável.
 
 ### Produtos Utilizados
 
-- **Sollum Rmp** (*Bradyrhizobium japonicum*) – Inoculante
+- **Sollum Rmp** (*Rhizobium sp.*) – Inoculante
 - **Sollum Az** (*Azospirillum brasilense*) – Inoculante
 - **Sollum Amy** (*Bacillus amyloliquefaciens*) – Promotor de crescimento
 - **Sollum Trc** (*Trichoderma harzianum*) - Controle de fitopatógenos

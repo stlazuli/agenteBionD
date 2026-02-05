@@ -4,11 +4,11 @@ from agno.models.anthropic import Claude
 from agno.os import AgentOS
 from agno.skills import Skills
 from agno.skills.loaders.local import LocalSkills
-from agno.tools.reasoning import ReasoningTools
-from agno.tools.memory import MemoryTools
+#from agno.tools.reasoning import ReasoningTools
+#from agno.tools.memory import MemoryTools
 from dotenv import load_dotenv
 from pathlib import Path
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from fastapi import FastAPI, HTTPException
 
 load_dotenv()
@@ -25,6 +25,10 @@ db = SqliteDb(
     memory_table="agent_memories",
 )
 
+class AgentResponseSchema(BaseModel):
+    reply: str = Field(..., description="The natural language response to the user (in Portuguese).")
+    status_code: int = Field(..., description="1 = Conversation ongoing (gathering data). 2 = Lead Qualified (All data collected: Name, Region, Hectares, CPF/CNPJ, IE).")
+    resume: str = Field(..., description="Simple resume of the information gathered from the client.")
 INSTRUCTIONS = """
 # PERSONA: BionD Commercial Specialist (Human Consultant)
 You are a HUMAN consultant specializing in biological solutions for agriculture. Your goal is to build relationships and qualify leads for sales.
@@ -66,6 +70,11 @@ You need to collect the following 3 distinct data points naturally:
 * **ONLY AFTER** you have all 3 points above: You may ask for the **CPF** or **CNPJ**.
 * **CLOSING:** Once CPF/CNPJ is obtained, ask them for the IE(INSCRICAO ESTADUAL),
 after they send it, thank them and confirm that the Regional Consultant will get in touch shortly.
+
+## 5. STATUS CODE LOGIC
+You must evaluate the conversation flow and assign a status code:
+* **STATUS 1 (Ongoing):** You are still getting to know the lead or asking for missing data (Name, Region, Hectares).
+* **STATUS 2 (Qualified/Finished):** You have successfully collected ALL data (Name, Region, Hectares, CPF/CNPJ and IE) and are closing the conversation/sending to the Regional Consultant.
 """
 
 # Skills
@@ -84,6 +93,7 @@ agent = Agent(
     num_history_runs=10,
     db=db,
     add_history_to_context=True,
+    output_schema=AgentResponseSchema,
     markdown=False,
 )
 
@@ -100,12 +110,23 @@ async def chat_customizado(dados: MensagemChat):
     try:
         
         response = agent.run(dados.message, session_id=dados.session_id, stream=False)        
-        resposta_texto = response.content if hasattr(response, 'content') else str(response)
+        ##resposta_texto = response.content if hasattr(response, 'content') else str(response)
         
+        if hasattr(response, 'content') and isinstance(response.content, AgentResponseSchema):
+            resposta_texto = response.content.reply
+            status_variavel = response.content.status_code
+            resumo = response.content.resume
+        else:
+            # Fallback if something fails or model refuses structure
+            resposta_texto = str(response.content)
+            status_variavel = 1 # Default to ongoing
+            resumo = ""
         return {
             "agent_response": {
                 "content": resposta_texto,
-                "status": "success"
+                "status": "success",
+                "st_conversa": status_variavel,
+                "resumo": resumo
             },
             "api_infrastructure": {
                 "api_key_status": "active",
