@@ -109,17 +109,27 @@ class MensagemChat(BaseModel):
 async def chat_customizado(dados: MensagemChat):
     try:
         
-        response = agent.run(dados.message, session_id=dados.session_id, stream=False)        
-        ##resposta_texto = response.content if hasattr(response, 'content') else str(response)
+        response = agent.run(dados.message, session_id=dados.session_id, stream=False)     
+        
+        #Subindo exceção no try caso venha uma mensagem de erro na resposta, indetectada
+        raw_resp = str(response.content) if hasattr(response, 'content') else str(response)
+        if "Error code:" in raw_resp or "invalid_request_error" in raw_resp:
+            raise Exception(raw_resp)
+        
+        
+        #-------------------------------------------------------------------------------
+        
+           
+        #resposta_texto = response.content if hasattr(response, 'content') else str(response)
         
         if hasattr(response, 'content') and isinstance(response.content, AgentResponseSchema):
             resposta_texto = response.content.reply
             status_variavel = response.content.status_code
             resumo = response.content.resume
         else:
-            # Fallback if something fails or model refuses structure
-            resposta_texto = str(response.content)
-            status_variavel = 1 # Default to ongoing
+            
+            resposta_texto = raw_resp
+            status_variavel = 1 # usando default
             resumo = ""
         return {
             "agent_response": {
@@ -140,14 +150,16 @@ async def chat_customizado(dados: MensagemChat):
             }
         }
     except Exception as e:
-        is_limit_error = "429" in str(e) or "limit_reached" in str(e).lower()
+        error_msg = str(e).lower()
+        is_limit_error = "429" in error_msg or "limit_reached" in error_msg
+        is_credit_error = "credit balance" in error_msg or "400" in error_msg
         return {
             "agent_response": {
                 "content": f"Erro interno: {str(e)}",
                 "status": "error"
             },
             "api_infrastructure": {
-                "api_key_status": "error" if is_limit_error else "active",
+                "api_key_status": "insufficient_credits" if is_credit_error else ("error" if is_limit_error else "active"),
                 "daily_limit_reached": is_limit_error,
                 "error_detail": str(e)
             },
