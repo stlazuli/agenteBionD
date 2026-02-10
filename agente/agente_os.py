@@ -82,7 +82,7 @@ skills = Skills(loaders=[LocalSkills(str(SKILLS_PATH))])
 # claude-haiku-4-5-20251001
 agent = Agent(
     name="BionD Agent",
-    model=Claude(id="claude-sonnet-4-5-20250929", temperature=0),
+    model=Claude(id="claude-sonnet-4-5-20250929", temperature=0, cache_system_prompt=True),
     description="Assistente de qualificação de leads da BionD",
     instructions=INSTRUCTIONS,
     tools=[
@@ -95,6 +95,7 @@ agent = Agent(
     add_history_to_context=True,
     output_schema=AgentResponseSchema,
     markdown=False,
+    #debug_mode=True,
 )
 
 agent_os = AgentOS(agents=[agent])
@@ -110,7 +111,7 @@ async def chat_customizado(dados: MensagemChat):
     try:
         
         response = agent.run(dados.message, session_id=dados.session_id, stream=False)     
-        
+         
         #Subindo exceção no try caso venha uma mensagem de erro na resposta, indetectada
         raw_resp = str(response.content) if hasattr(response, 'content') else str(response)
         if "Error code:" in raw_resp or "invalid_request_error" in raw_resp:
