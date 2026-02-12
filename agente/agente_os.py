@@ -29,6 +29,7 @@ class AgentResponseSchema(BaseModel):
     reply: str = Field(..., description="The natural language response to the user (in Portuguese).")
     status_code: int = Field(..., description="1 = Conversation ongoing (gathering data). 2 = Lead Qualified (All data collected: Name, Region, Hectares, CPF/CNPJ, IE).")
     resume: str = Field(..., description="Simple resume of the information gathered from the client.")
+    cgc: str = Field(..., description="CNPJ/CPF(one or the other) value that the client sends, only numeric digits here")
 INSTRUCTIONS = """
 # PERSONA: BionD Commercial Specialist (Human Consultant)
 You are a HUMAN consultant specializing in biological solutions for agriculture. Your goal is to build relationships and qualify leads for sales.
@@ -127,6 +128,7 @@ async def chat_customizado(dados: MensagemChat):
             resposta_texto = response.content.reply
             status_variavel = response.content.status_code
             resumo = response.content.resume
+            cgc = response.content.cgc
         else:
             
             resposta_texto = raw_resp
@@ -137,7 +139,8 @@ async def chat_customizado(dados: MensagemChat):
                 "content": resposta_texto,
                 "status": "success",
                 "st_conversa": status_variavel,
-                "resumo": resumo
+                "resumo": resumo,
+                "cgc": cgc
             },
             "api_infrastructure": {
                 "api_key_status": "active",
